@@ -4,27 +4,6 @@ module Cloudflare
   module Rails
     class Railtie < ::Rails::Railtie
 
-      # patch rack::request::helpers to use our cloudflare ips - this way request.ip is
-      # correct inside of rack and rails
-      module CheckTrustedProxies
-        def trusted_proxy?(ip)
-          ::Rails.application.config.cloudflare.ips.any?{ |proxy| proxy === ip } || super
-        end
-      end
-
-      Rack::Request::Helpers.prepend CheckTrustedProxies
-
-      # patch ActionDispatch::RemoteIP to use our cloudflare ips - this way
-      # request.remote_ip is correct inside of rails
-      module RemoteIpProxies
-
-        def proxies
-          super + ::Rails.application.config.cloudflare.ips
-        end
-      end
-
-      ActionDispatch::RemoteIp.prepend RemoteIpProxies
-
       class Importer
         include HTTParty
         base_uri 'https://www.cloudflare.com'
